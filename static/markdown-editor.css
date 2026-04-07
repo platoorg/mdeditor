@@ -1,0 +1,121 @@
+.markdown-wrapper {
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.markdown-wrapper .md-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f5f5f5;
+  border-bottom: 1px solid #dbdbdb;
+  padding: 4px 8px;
+}
+
+.markdown-wrapper .md-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.markdown-wrapper .md-tab {
+  background: none;
+  border: none;
+  padding: 4px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.markdown-wrapper .md-tab.is-active {
+  background: white;
+  font-weight: 600;
+  color: #363636;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.markdown-wrapper .md-tab:hover:not(.is-active) {
+  background: #ebebeb;
+}
+
+.markdown-wrapper .md-textarea {
+  width: 100%;
+  min-height: 200px;
+  border: none;
+  padding: 12px;
+  resize: vertical;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  outline: none;
+  display: block;
+  box-sizing: border-box;
+  background: white;
+}
+
+.markdown-wrapper .md-preview-pane {
+  min-height: 200px;
+  padding: 12px 16px;
+  overflow-y: auto;
+  background: white;
+}
+
+.markdown-wrapper .md-fs-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 5px;
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  color: #555;
+}
+
+.markdown-wrapper .md-fs-btn:hover {
+  background: #ebebeb;
+}
+
+.markdown-wrapper .md-fs-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: #444;
+}
+
+/* Fullscreen mode */
+.markdown-wrapper.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.markdown-wrapper.is-fullscreen .md-toolbar {
+  flex-shrink: 0;
+}
+
+.markdown-wrapper.is-fullscreen .md-pane {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.markdown-wrapper.is-fullscreen .md-textarea {
+  height: 100%;
+  min-height: 0;
+  resize: none;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem;
+  font-size: 1rem;
+}
+
+.markdown-wrapper.is-fullscreen .md-preview-pane {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem;
+}
