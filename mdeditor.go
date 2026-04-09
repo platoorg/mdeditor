@@ -18,7 +18,7 @@
 //  3. Render a field widget:
 //
 //     html, err := mdeditor.Render("body", item.Body, mdeditor.Options{
-//         DraftURL: "/api/drafts/my-field",
+//     DraftURL: "/api/drafts/my-field",
 //     })
 package mdeditor
 
@@ -48,13 +48,13 @@ func Handler() http.Handler {
 
 // Options configures a single editor widget instance.
 type Options struct {
-	// Required marks the underlying textarea as required for form validation.
-	Required bool
 
 	// DraftURL is the base URL for autosave draft persistence.
 	// The handler must support GET, PUT (body: {"value":"..."}), and DELETE.
 	// Leave empty to disable autosave.
 	DraftURL string
+	// Required marks the underlying textarea as required for form validation.
+	Required bool
 }
 
 var widgetTmpl = template.Must(template.New("mdeditor-widget").Parse(`<div id="md-wrapper-{{.Name}}" class="markdown-wrapper">
