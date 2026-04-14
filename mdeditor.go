@@ -11,9 +11,9 @@
 //
 //  2. Add the assets to your page <head> (adjust the prefix to match your mount point):
 //
-//     <link  rel="stylesheet" href="/mdeditor/static/markdown-editor.css">
-//     <script src="/mdeditor/static/marked.min.js"></script>
-//     <script src="/mdeditor/static/markdown-editor.js"></script>
+//     <link  rel="stylesheet" href="/mdeditor/markdown-editor.css">
+//     <script src="/mdeditor/marked.min.js"></script>
+//     <script src="/mdeditor/markdown-editor.js"></script>
 //
 //  3. Render a field widget:
 //

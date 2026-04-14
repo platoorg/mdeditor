@@ -40,9 +40,9 @@ r.Handle("/mdeditor/*", http.StripPrefix("/mdeditor", mdeditor.Handler()))
 ### 2. Add the assets to your page `<head>`
 
 ```html
-<link rel="stylesheet" href="/mdeditor/static/markdown-editor.css">
-<script src="/mdeditor/static/marked.min.js"></script>
-<script src="/mdeditor/static/markdown-editor.js"></script>
+<link rel="stylesheet" href="/mdeditor/markdown-editor.css">
+<script src="/mdeditor/marked.min.js"></script>
+<script src="/mdeditor/markdown-editor.js"></script>
 ```
 
 Adjust the `/mdeditor` prefix to match where you mounted the handler.
