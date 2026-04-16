@@ -68,7 +68,7 @@ var widgetTmpl = template.Must(template.New("mdeditor-widget").Parse(`<div id="m
 	<div class="md-pane" id="md-write-{{.Name}}">
 		<textarea name="{{.Name}}" class="md-textarea"{{if .Required}} required{{end}}>{{.Value}}</textarea>
 	</div>
-	<div class="md-pane" id="md-preview-{{.Name}}" style="display:none">
+	<div class="md-pane md-preview-pane" id="md-preview-{{.Name}}" style="display:none">
 		<div class="md-preview-content"></div>
 	</div>
 </div>

@@ -101,7 +101,7 @@
 
 .markdown-wrapper.is-fullscreen .md-pane {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden; /* write pane: textarea manages its own scroll */
 }
 
 .markdown-wrapper.is-fullscreen .md-textarea {
@@ -115,6 +115,7 @@
 }
 
 .markdown-wrapper.is-fullscreen .md-preview-pane {
+  overflow-y: auto;
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem 2.5rem;
