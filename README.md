@@ -1,6 +1,6 @@
 # mdeditor
 
-A standalone markdown editor widget for Go web applications. No npm, no bundler, no CDN — everything is embedded in the package binary.
+A standalone markdown editor widget for Go web applications. Consumers need no npm, no bundler, no CDN — everything is embedded in the package binary. (The JS itself is developed in TypeScript and compiled at commit time — see [Development](#development).)
 
 **Features**
 
@@ -42,10 +42,11 @@ r.Handle("/mdeditor/*", http.StripPrefix("/mdeditor", mdeditor.Handler()))
 ```html
 <link rel="stylesheet" href="/mdeditor/markdown-editor.css">
 <script src="/mdeditor/marked.min.js"></script>
+<script src="/mdeditor/purify.min.js"></script>
 <script src="/mdeditor/markdown-editor.js"></script>
 ```
 
-Adjust the `/mdeditor` prefix to match where you mounted the handler.
+Adjust the `/mdeditor` prefix to match where you mounted the handler. `purify.min.js` (DOMPurify) must load before `markdown-editor.js` — the preview pane sanitizes marked's output through it before injecting into the DOM, since marked passes raw HTML through untouched.
 
 ### 3. Render a widget
 
@@ -67,12 +68,13 @@ The returned `template.HTML` is safe to inject directly into your template outpu
 
 ### `Handler() http.Handler`
 
-Returns an `http.Handler` that serves the three static assets embedded in the package:
+Returns an `http.Handler` that serves the static assets embedded in the package:
 
 | Path | Content |
 |------|---------|
-| `/static/markdown-editor.js` | Editor logic |
+| `/static/markdown-editor.js` | Editor logic (compiled from `src/*.ts`, see [Development](#development)) |
 | `/static/marked.min.js` | Markdown parser (marked v15) |
+| `/static/purify.min.js` | DOMPurify — sanitizes rendered HTML before it's injected into the preview pane |
 | `/static/markdown-editor.css` | Editor styles |
 
 Mount it with `http.StripPrefix` so requests arrive without the path prefix.
@@ -175,9 +177,37 @@ The fullscreen overlay uses `z-index: 9999`. Adjust if needed for your layout.
 
 ## How it works
 
-The package uses Go's `embed` directive to bundle `markdown-editor.js`, `marked.min.js`, and `markdown-editor.css` directly into your binary. `Handler()` serves them from memory via `http.FileServer`. `Render()` generates the widget HTML and a small inline script that calls `initMarkdownEditor(name, options)`.
+The package uses Go's `embed` directive to bundle `markdown-editor.js`, `marked.min.js`, `purify.min.js`, and `markdown-editor.css` directly into your binary. `Handler()` serves them from memory via `http.FileServer`. `Render()` generates the widget HTML and a small inline script that calls `initMarkdownEditor(name, options)`.
 
 The editor stores content in a plain `<textarea>` — standard form submission works without any extra JavaScript.
+
+---
+
+## Development
+
+`static/markdown-editor.js` is a generated file, committed to the repo so `go get` consumers never need Node — do not hand-edit it. Its source lives in `src/*.ts`.
+
+```
+src/
+  icons.ts        pure — SVG icon selection
+  panes.ts        pure — tab/pane visibility logic
+  fullscreen.ts   pure — fullscreen toggle state transitions
+  draft.ts        pure — autosave draft note view logic
+  markdown.ts     pure — markdown render + sanitize policy
+  index.ts        impure shell — DOM events, fetch, timers; wires the pure modules above
+```
+
+All decision logic is written as pure functions (no DOM, no fetch, no `Date.now()`/`Math.random()`) so it's unit-testable without a browser or mocks. `src/index.ts` is the only impure module — it owns every DOM read/write and network call, delegating every decision to the pure modules.
+
+```bash
+npm install
+npm run typecheck   # tsc --noEmit
+npm test            # vitest — unit tests per pure module + one DOM smoke test on the compiled bundle
+npm run build       # esbuild bundles src/index.ts -> static/markdown-editor.js
+npm run check        # all three, in order
+```
+
+After changing anything under `src/`, run `npm run build` and commit the regenerated `static/markdown-editor.js` alongside your source change — `go build`/`go test` never invoke the JS toolchain themselves.
 
 ---
 
