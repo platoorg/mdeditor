@@ -72,23 +72,39 @@ var widgetTmpl = template.Must(template.New("mdeditor-widget").Parse(`<div id="m
 		<div class="md-preview-content"></div>
 	</div>
 </div>
-<script>initMarkdownEditor({{.NameJS}}, {{.OptsJS}});</script>`))
+<script>initMarkdownEditor({{.Name}}, {{.Opts}});</script>`))
+
+// widgetOpts is the JS-side options object. Passing a struct and letting
+// html/template's jsValEscaper marshal it is what makes the script tag safe;
+// see Render.
+type widgetOpts struct {
+	DraftURL string `json:"draftURL,omitempty"`
+}
 
 // Render returns the HTML for a markdown editor widget.
 // name is the HTML form field name; value is the initial textarea content.
+//
+// The two values interpolated into the <script> are passed as ordinary Go
+// values, NOT as template.JS.
+//
+// template.JS is emitted verbatim — jsValEscaper has `case JS: return
+// string(t)` — so the previous template.JS(fmt.Sprintf("%q", name)) put
+// unescaped attacker-controlled data inside a script element. %q escapes
+// quotes, backslashes and control characters but NOT "<", ">" or "/", so a
+// field named `a</script><script>...` closed the element early and everything
+// after it was parsed as fresh markup, executing same-origin in whoever's
+// browser rendered the widget.
+//
+// Handing jsValEscaper the raw values instead makes it JSON-encode them and
+// escape "<", ">", "&" and U+2028/9. Callers should still avoid deriving
+// field names from untrusted input.
 func Render(name, value string, opts Options) (template.HTML, error) {
-	optsJS := "{}"
-	if opts.DraftURL != "" {
-		optsJS = fmt.Sprintf(`{"draftURL":%q}`, opts.DraftURL)
-	}
-
 	var b strings.Builder
 	err := widgetTmpl.Execute(&b, map[string]interface{}{
 		"Name":     name,
 		"Value":    value,
 		"Required": opts.Required,
-		"NameJS":   template.JS(fmt.Sprintf("%q", name)),
-		"OptsJS":   template.JS(optsJS),
+		"Opts":     widgetOpts{DraftURL: opts.DraftURL},
 	})
 	if err != nil {
 		return "", fmt.Errorf("mdeditor: render %q: %w", name, err)
