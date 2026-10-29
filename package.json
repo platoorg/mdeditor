@@ -1,8 +1,15 @@
 {
-  "name": "mdeditor",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@platoorg/mdeditor",
+  "version": "0.1.0",
+  "description": "Markdown editor: a contenteditable core with iA-style hanging headings, and a Go-embeddable form widget.",
+  "license": "MIT",
   "type": "module",
+  "repository": "github:platoorg/mdeditor",
+  "exports": {
+    ".": "./src/core/index.ts",
+    "./editor.css": "./src/core/editor.css"
+  },
+  "files": ["src/core", "LICENSE", "README.md"],
   "scripts": {
     "build": "node esbuild.config.mjs",
     "test": "vitest run",

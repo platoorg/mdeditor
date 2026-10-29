@@ -1,9 +1,42 @@
+/* GENERATED - do not edit by hand. Source: src/. Run `npm run build` to regenerate. */
+/* src/core/editor.css */
+.mde {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.mde .ln--h1,
+.mde .ln--h2,
+.mde .ln--h3,
+.mde .ln--h4,
+.mde .ln--h5,
+.mde .ln--h6 {
+  font-weight: 650;
+}
+.mde .ln--h1 {
+  text-indent: -2ch;
+}
+.mde .ln--h2 {
+  text-indent: -3ch;
+}
+.mde .ln--h3 {
+  text-indent: -4ch;
+}
+.mde .ln--h4 {
+  text-indent: -5ch;
+}
+.mde .ln--h5 {
+  text-indent: -6ch;
+}
+.mde .ln--h6 {
+  text-indent: -7ch;
+}
+
+/* src/widget/widget.css */
 .markdown-wrapper {
   border: 1px solid #dbdbdb;
   border-radius: 4px;
   overflow: hidden;
 }
-
 .markdown-wrapper .md-toolbar {
   display: flex;
   justify-content: space-between;
@@ -12,12 +45,10 @@
   border-bottom: 1px solid #dbdbdb;
   padding: 4px 8px;
 }
-
 .markdown-wrapper .md-tabs {
   display: flex;
   gap: 2px;
 }
-
 .markdown-wrapper .md-tab {
   background: none;
   border: none;
@@ -27,44 +58,69 @@
   font-size: 0.875rem;
   color: #666;
 }
-
 .markdown-wrapper .md-tab.is-active {
   background: white;
   font-weight: 600;
   color: #363636;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
 .markdown-wrapper .md-tab:hover:not(.is-active) {
   background: #ebebeb;
 }
-
-.markdown-wrapper .md-textarea {
-  width: 100%;
+.markdown-wrapper .md-input {
   min-height: 200px;
-  border: none;
-  padding: 12px;
-  resize: vertical;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  padding: 12px 12px 12px calc(12px + 4ch);
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
   font-size: 0.9rem;
   line-height: 1.6;
   outline: none;
-  display: block;
   box-sizing: border-box;
   background: white;
+  color: #363636;
+  cursor: text;
 }
-
+.markdown-wrapper .md-invalid-note,
+.md-draft-note {
+  margin: 0;
+  font-size: 0.85em;
+}
+.markdown-wrapper .md-invalid-note {
+  color: #B42318;
+  padding: 0 12px;
+  background: white;
+}
+.markdown-wrapper .md-invalid-note:empty {
+  display: none;
+}
+.markdown-wrapper .md-invalid-note:not(:empty) {
+  padding: 4px 12px 8px;
+}
+.md-draft-note {
+  margin-top: 0.25rem;
+  min-height: 1.2em;
+  color: #6B6B6B;
+}
+.md-draft-note .md-draft-restored {
+  color: #2156B8;
+}
+.md-draft-note .md-draft-discard {
+  color: #B42318;
+}
+.markdown-wrapper:focus-within {
+  border-color: #E97F4A;
+  box-shadow: 0 0 0 2px rgba(233, 127, 74, 0.2);
+}
 .markdown-wrapper .md-preview-pane {
   min-height: 200px;
   padding: 12px 16px;
   overflow-y: auto;
   background: white;
 }
-
-/* Preview typography. The host app's CSS reset (Bulma flattens h1–h6
-   outside .content) would otherwise render headings identical to body
-   text. Scoped under .md-preview-content so the rules are self-contained
-   and also apply in fullscreen mode and non-Bulma consumers. */
 .markdown-wrapper .md-preview-content h1,
 .markdown-wrapper .md-preview-content h2,
 .markdown-wrapper .md-preview-content h3,
@@ -80,10 +136,18 @@
 .markdown-wrapper .md-preview-content h3:first-child {
   margin-top: 0;
 }
-.markdown-wrapper .md-preview-content h1 { font-size: 1.75em; }
-.markdown-wrapper .md-preview-content h2 { font-size: 1.4em; }
-.markdown-wrapper .md-preview-content h3 { font-size: 1.2em; }
-.markdown-wrapper .md-preview-content h4 { font-size: 1.05em; }
+.markdown-wrapper .md-preview-content h1 {
+  font-size: 1.75em;
+}
+.markdown-wrapper .md-preview-content h2 {
+  font-size: 1.4em;
+}
+.markdown-wrapper .md-preview-content h3 {
+  font-size: 1.2em;
+}
+.markdown-wrapper .md-preview-content h4 {
+  font-size: 1.05em;
+}
 .markdown-wrapper .md-preview-content p {
   margin: 0 0 0.75em;
 }
@@ -91,9 +155,15 @@
 .markdown-wrapper .md-preview-content ol {
   margin: 0 0 0.75em 1.5em;
 }
-.markdown-wrapper .md-preview-content ul { list-style: disc; }
-.markdown-wrapper .md-preview-content ol { list-style: decimal; }
-.markdown-wrapper .md-preview-content li { margin-bottom: 0.25em; }
+.markdown-wrapper .md-preview-content ul {
+  list-style: disc;
+}
+.markdown-wrapper .md-preview-content ol {
+  list-style: decimal;
+}
+.markdown-wrapper .md-preview-content li {
+  margin-bottom: 0.25em;
+}
 .markdown-wrapper .md-preview-content blockquote {
   border-left: 3px solid #dbdbdb;
   color: #666;
@@ -135,7 +205,6 @@
   height: 1px;
   margin: 1em 0;
 }
-
 .markdown-wrapper .md-fs-btn {
   background: none;
   border: none;
@@ -146,19 +215,15 @@
   border-radius: 3px;
   color: #555;
 }
-
 .markdown-wrapper .md-fs-btn:hover {
   background: #ebebeb;
 }
-
 .markdown-wrapper .md-fs-btn svg {
   width: 14px;
   height: 14px;
   display: block;
   fill: #444;
 }
-
-/* Fullscreen mode */
 .markdown-wrapper.is-fullscreen {
   position: fixed;
   inset: 0;
@@ -169,29 +234,186 @@
   flex-direction: column;
   background: white;
 }
-
 .markdown-wrapper.is-fullscreen .md-toolbar {
   flex-shrink: 0;
 }
-
 .markdown-wrapper.is-fullscreen .md-pane {
   flex: 1;
-  overflow: hidden; /* write pane: textarea manages its own scroll */
-}
-
-.markdown-wrapper.is-fullscreen .md-textarea {
-  height: 100%;
   min-height: 0;
-  resize: none;
+  overflow: hidden;
+}
+.markdown-wrapper.is-fullscreen .md-pane:not(.md-preview-pane) {
+  display: flex;
+  flex-direction: column;
+}
+.markdown-wrapper.is-fullscreen .md-input {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 2.5rem;
+  padding: 2rem 2.5rem 2rem calc(2.5rem + 4ch);
   font-size: 1rem;
 }
-
+.markdown-wrapper.is-fullscreen:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+.markdown-wrapper.is-fullscreen::backdrop {
+  background: white;
+}
 .markdown-wrapper.is-fullscreen .md-preview-pane {
   overflow-y: auto;
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem 2.5rem;
+}
+.markdown-wrapper .md-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.markdown-wrapper .md-img-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 3px;
+  font-size: 0.875rem;
+  color: #363636;
+}
+.markdown-wrapper .md-img-btn:hover {
+  background: #ebebeb;
+}
+.markdown-wrapper .md-img-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  fill: #444;
+}
+.markdown-wrapper .md-img-btn:focus-visible,
+.markdown-wrapper .md-fs-btn:focus-visible,
+.markdown-wrapper .md-tab:focus-visible {
+  outline: 2px solid #E97F4A;
+  outline-offset: 1px;
+}
+.markdown-wrapper.is-dropping {
+  border-color: #E97F4A;
+  box-shadow: 0 0 0 3px rgba(233, 127, 74, 0.35);
+}
+.markdown-wrapper.is-dropping .md-input {
+  background: #fff8f4;
+}
+.markdown-wrapper .md-img-status {
+  margin: 0;
+  padding: 0 12px;
+  font-size: 0.85em;
+  color: #6B6B6B;
+  background: white;
+}
+.markdown-wrapper .md-img-status:empty {
+  display: none;
+}
+.markdown-wrapper .md-img-status:not(:empty) {
+  padding: 4px 12px 8px;
+}
+.md-img-status.is-error,
+.md-img-dialog .md-img-msg.is-error {
+  color: #B42318;
+}
+.md-img-dialog {
+  margin: auto;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  padding: 0;
+  width: min(28rem, calc(100vw - 2rem));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+.md-img-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+.md-img-dialog .md-img-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+}
+.md-img-dialog .md-img-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+.md-img-dialog .md-img-preview {
+  background: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  max-height: 12rem;
+  overflow: hidden;
+}
+.md-img-dialog .md-img-preview img {
+  max-width: 100%;
+  max-height: 12rem;
+  object-fit: contain;
+}
+.md-img-dialog .md-img-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.md-img-dialog .md-img-req,
+.md-img-dialog .md-img-hint {
+  color: #6B6B6B;
+  font-weight: 400;
+  font-size: 0.85rem;
+  margin: 0;
+}
+.md-img-dialog .md-img-alt {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font: inherit;
+  resize: vertical;
+}
+.md-img-dialog .md-img-alt:focus {
+  outline: none;
+  border-color: #E97F4A;
+  box-shadow: 0 0 0 2px rgba(233, 127, 74, 0.2);
+}
+.md-img-dialog .md-img-progress {
+  width: 100%;
+  height: 6px;
+}
+.md-img-dialog .md-img-msg {
+  margin: 0;
+  font-size: 0.85rem;
+  min-height: 1.2em;
+}
+.md-img-dialog .md-img-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.md-img-dialog .md-img-actions button {
+  border-radius: 4px;
+  border: 1px solid #dbdbdb;
+  background: white;
+  padding: 6px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+.md-img-dialog .md-img-actions .md-img-insert {
+  background: #B8501C;
+  border-color: #B8501C;
+  color: white;
+  font-weight: 600;
+}
+.md-img-dialog .md-img-actions .md-img-insert:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

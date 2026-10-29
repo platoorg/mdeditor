@@ -1,0 +1,20 @@
+/* mdeditor core styles. Apply class "mde" to the editor element (and to
+   any backdrop rendered with renderLines, so both lay out the same).
+
+   iA-style hanging headline hashes: heading lines pull their first line
+   left by the marker width, so the heading TEXT starts on the same edge
+   as body text and the hashes sit in the gutter. The host gives the
+   element at least 4ch of left padding for that gutter. Wrapped heading
+   lines align back to the text edge automatically. */
+.mde {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.mde .ln--h1, .mde .ln--h2, .mde .ln--h3,
+.mde .ln--h4, .mde .ln--h5, .mde .ln--h6 { font-weight: 650; }
+.mde .ln--h1 { text-indent: -2ch; }
+.mde .ln--h2 { text-indent: -3ch; }
+.mde .ln--h3 { text-indent: -4ch; }
+.mde .ln--h4 { text-indent: -5ch; }
+.mde .ln--h5 { text-indent: -6ch; }
+.mde .ln--h6 { text-indent: -7ch; }
