@@ -1,40 +1,41 @@
 # mdeditor
 
-A standalone markdown editor widget for Go web applications. Consumers need no npm, no bundler, no CDN — everything is embedded in the package binary. (The JS itself is developed in TypeScript and compiled at commit time — see [Development](#development).)
+A markdown editor in two layers:
 
-**Features**
+- **Core** (`src/core`, TypeScript): a hand-rolled contenteditable editor
+  with iA Writer-style hanging headings, list continuation, bracket
+  wrapping, its own undo history, plain-text paste and IME support.
+  No runtime dependencies. [exWriter](https://writer.exaptation.tech) uses it directly.
+- **Widget** (Go package + `static/`): a form field built on the core,
+  with Write/Preview tabs, fullscreen writing, draft autosave and image
+  upload. Everything is embedded in the Go binary: no npm, bundler or CDN
+  for consumers. Plato uses it.
 
-- Write / Preview tabs with live rendering
-- Fullscreen writing mode (Esc to exit)
-- Optional autosave drafts via a configurable REST endpoint
-- Zero external dependencies at runtime
+**Editing features**
+
+- Headings keep their text on the body edge; the `#` marks hang in the
+  left gutter.
+- Enter on a list item starts the next one (`-`, `*`, `+`, `1.`, `1)`,
+  `- [ ]`), counting numbers up; Enter on an empty item ends the list.
+  Shift+Enter is a plain line break.
+- With text selected, typing `(` `[` `{` `"` `'` `` ` `` `*` `_` `~` wraps
+  the selection and keeps it selected, so `*` twice gives `**bold**`.
+  Works with Option-typed brackets on German and Nordic Mac layouts.
+- Paste and drop are always plain text; pasted or dropped images go to a
+  callback (the widget uploads them).
 
 ---
 
-## Installation
+## Go widget
 
 ```bash
 go get github.com/platoorg/mdeditor
 ```
 
-Requires Go 1.21 or later (uses `embed`).
-
----
-
-## Quick start
-
 ### 1. Mount the asset handler
 
-Register the handler once at startup. The prefix you choose determines the URLs used in your HTML.
-
 ```go
-import "github.com/platoorg/mdeditor"
-
-// Using the standard library mux:
 http.Handle("/mdeditor/", http.StripPrefix("/mdeditor", mdeditor.Handler()))
-
-// Using a third-party router (e.g. chi):
-r.Handle("/mdeditor/*", http.StripPrefix("/mdeditor", mdeditor.Handler()))
 ```
 
 ### 2. Add the assets to your page `<head>`
@@ -46,171 +47,122 @@ r.Handle("/mdeditor/*", http.StripPrefix("/mdeditor", mdeditor.Handler()))
 <script src="/mdeditor/markdown-editor.js"></script>
 ```
 
-Adjust the `/mdeditor` prefix to match where you mounted the handler. `purify.min.js` (DOMPurify) must load before `markdown-editor.js` — the preview pane sanitizes marked's output through it before injecting into the DOM, since marked passes raw HTML through untouched.
+`purify.min.js` (DOMPurify) must load before `markdown-editor.js`: the
+preview sanitizes marked's output, since marked passes raw HTML through.
+Without it the preview fails closed and shows plain text.
+
+All assets are same-origin and nothing uses `eval`, so a CSP of
+`script-src 'self' 'unsafe-inline'` (the inline initialiser) is enough.
 
 ### 3. Render a widget
 
 ```go
-import "github.com/platoorg/mdeditor"
-
-html, err := mdeditor.Render("body", post.Body, mdeditor.Options{})
-if err != nil {
-    // handle error
-}
-// pass html to your template as template.HTML
-```
-
-The returned `template.HTML` is safe to inject directly into your template output — it contains the widget markup and a small inline `<script>` initialiser.
-
----
-
-## API reference
-
-### `Handler() http.Handler`
-
-Returns an `http.Handler` that serves the static assets embedded in the package:
-
-| Path | Content |
-|------|---------|
-| `/static/markdown-editor.js` | Editor logic (compiled from `src/*.ts`, see [Development](#development)) |
-| `/static/marked.min.js` | Markdown parser (marked v15) |
-| `/static/purify.min.js` | DOMPurify — sanitizes rendered HTML before it's injected into the preview pane |
-| `/static/markdown-editor.css` | Editor styles |
-
-Mount it with `http.StripPrefix` so requests arrive without the path prefix.
-
----
-
-### `Render(name, value string, opts Options) (template.HTML, error)`
-
-Renders the editor widget HTML for a single form field.
-
-| Parameter | Description |
-|-----------|-------------|
-| `name` | The HTML `name` attribute of the textarea (used for form submission) |
-| `value` | Initial markdown content |
-| `opts` | See `Options` below |
-
-Returns `template.HTML` (already escaped for safe injection) and an error.
-
----
-
-### `type Options`
-
-```go
-type Options struct {
-    // Required marks the textarea as required for HTML form validation.
-    Required bool
-
-    // DraftURL is the endpoint used for autosave.
-    // Leave empty to disable autosave entirely.
-    DraftURL string
-}
-```
-
----
-
-## Autosave drafts
-
-When `Options.DraftURL` is set, the editor will automatically save draft content to that endpoint. Your server must implement three operations on that URL:
-
-| Method | Behaviour |
-|--------|-----------|
-| `GET` | Return `204 No Content` (no draft) or `200` with `{"value":"...","updated_at":"..."}` |
-| `PUT` | Persist the draft — body is `{"value":"..."}` |
-| `DELETE` | Discard the draft (called on form submit) |
-
-Example with a unique URL per field:
-
-```go
 html, err := mdeditor.Render("body", post.Body, mdeditor.Options{
-    DraftURL: fmt.Sprintf("/api/drafts/%s/%s/body", schemaID, itemID),
-})
-```
-
-When a draft exists and differs from the saved value, a restore banner is shown with a discard link. The draft is deleted automatically on form submit.
-
----
-
-## Using from `html/template`
-
-Register a template function so you can call `Render` directly from your templates:
-
-```go
-tmpl := template.New("").Funcs(template.FuncMap{
-    "mdeditor": func(name, value string) (template.HTML, error) {
-        return mdeditor.Render(name, value, mdeditor.Options{})
+    Required: true,
+    DraftURL: fmt.Sprintf("/api/drafts/%s/body", post.ID),
+    Upload: &mdeditor.UploadOptions{
+        URL:         "/api/upload",
+        Fields:      map[string]string{"namespace": "site"},
+        MediaPrefix: "/media/",
+        PublicBase:  "https://media.example.com",
     },
 })
 ```
 
-Then in your template:
+The server renders a plain `<textarea name="body">`, so the form works
+without JavaScript. The script hides it, puts the editor in its place and
+copies every edit back into it (firing `input` on the textarea, so dirty
+checks keep working). A `<label for="md-textarea-body">` names the editor.
+For a required field left empty, the submit is blocked and a message is
+shown under the editor.
 
-```html
-<div class="field">
-    <label class="label">Body</label>
-    {{mdeditor "body" .Post.Body}}
-</div>
-```
+### `Options`
+
+| Field | Meaning |
+|---|---|
+| `Required` | Marks the field required for form validation. |
+| `DraftURL` | Autosave endpoint, see below. Empty disables autosave. |
+| `Upload` | Enables the Image button, image paste and drop. Nil (or an empty `URL`) disables them. |
+
+### Image upload
+
+The widget POSTs `multipart/form-data` to `Upload.URL` with the image under
+`file` plus every entry of `Fields`, and expects JSON `{"url": "..."}`.
+Before upload, photos are scaled to at most 2400px and re-encoded, which
+drops EXIF data (GIFs are left alone). The author must enter alt text, then
+`![alt](url)` is inserted as its own paragraph. A returned URL starting
+with `MediaPrefix` gets that prefix replaced by `PublicBase`; a URL that is
+still relative is made absolute, because other sites read the markdown.
+
+### Autosave drafts
+
+| Method | Behaviour |
+|---|---|
+| `GET` | `204` (no draft) or `200` with `{"value":"...","updated_at":"..."}` |
+| `PUT` | Persist the draft, body `{"value":"..."}` |
+| `DELETE` | Discard the draft (sent on form submit) |
+
+When a draft differs from the saved value it is restored, with a Discard link.
+
+### Globals
+
+`markdown-editor.js` also defines `renderMarkdownSafe(md)` (marked +
+DOMPurify), `markdownImageSnippet(alt, url)` and
+`markdownPublicImageURL(url, uploadConfig)` for host pages.
 
 ---
 
-## Styling
+## TypeScript core
 
-The editor uses a set of scoped CSS classes (all prefixed `.markdown-wrapper`). The default styles are minimal and can be overridden:
-
-```css
-/* Increase minimum editor height */
-.markdown-wrapper .md-textarea {
-    min-height: 400px;
-}
-
-/* Style the preview pane */
-.markdown-wrapper .md-preview-content {
-    font-family: Georgia, serif;
-}
+```bash
+npm install https://github.com/platoorg/mdeditor/archive/refs/tags/v0.1.0.tar.gz
 ```
 
-The fullscreen overlay uses `z-index: 9999`. Adjust if needed for your layout.
+The package ships TypeScript source; bundle it with your app (Vite and
+esbuild handle it as is).
 
----
+```ts
+import { create } from '@platoorg/mdeditor';
+import '@platoorg/mdeditor/editor.css';
 
-## How it works
+const ed = create(document.getElementById('doc')!, {
+  onChange: (text) => save(text),
+  onPasteFiles: (files) => storeImages(files),
+  // wrapPairs: false, to turn bracket wrapping off
+});
+ed.setValue('# Hello', { resetHistory: true });
+```
 
-The package uses Go's `embed` directive to bundle `markdown-editor.js`, `marked.min.js`, `purify.min.js`, and `markdown-editor.css` directly into your binary. `Handler()` serves them from memory via `http.FileServer`. `Render()` generates the widget HTML and a small inline script that calls `initMarkdownEditor(name, options)`.
-
-The editor stores content in a plain `<textarea>` — standard form submission works without any extra JavaScript.
+Give the element `contenteditable="true"`, the class `mde`, and at least
+4ch of left padding for the heading gutter. Selections are plain-text
+offsets: `getSelection()`, `getCaret()`, `setSelection(start, end)`,
+`replaceRange(start, end, text)`, `offsetFromPoint(x, y)` (for drops).
+`renderLines(text, ranges)` renders the same line layout with highlight
+ranges, for a backdrop behind the editor.
 
 ---
 
 ## Development
 
-`static/markdown-editor.js` is a generated file, committed to the repo so `go get` consumers never need Node — do not hand-edit it. Its source lives in `src/*.ts`.
-
 ```
-src/
-  icons.ts        pure — SVG icon selection
-  panes.ts        pure — tab/pane visibility logic
-  fullscreen.ts   pure — fullscreen toggle state transitions
-  draft.ts        pure — autosave draft note view logic
-  markdown.ts     pure — markdown render + sanitize policy
-  index.ts        impure shell — DOM events, fetch, timers; wires the pure modules above
+src/core/     the editor (editor.ts), its CSS, the package entry
+src/widget/   the form widget: tabs, preview, drafts, images, fullscreen
+static/       built widget (committed: go-get consumers don't run Node)
+test/         vitest (jsdom)
+mdeditor.go   Render + Handler
 ```
-
-All decision logic is written as pure functions (no DOM, no fetch, no `Date.now()`/`Math.random()`) so it's unit-testable without a browser or mocks. `src/index.ts` is the only impure module — it owns every DOM read/write and network call, delegating every decision to the pure modules.
 
 ```bash
-npm install
-npm run typecheck   # tsc --noEmit
-npm test            # vitest — unit tests per pure module + one DOM smoke test on the compiled bundle
-npm run build       # esbuild bundles src/index.ts -> static/markdown-editor.js
-npm run check        # all three, in order
+npm ci
+npm run check   # tsc, vitest, then build static/
+go test ./...
 ```
 
-After changing anything under `src/`, run `npm run build` and commit the regenerated `static/markdown-editor.js` alongside your source change — `go build`/`go test` never invoke the JS toolchain themselves.
-
----
+CI fails when `static/` doesn't match a fresh build, so commit it after
+`npm run build`.
 
 ## License
 
-MIT
+MIT, see [LICENSE](LICENSE). Bundled in `static/`: marked (MIT) and
+DOMPurify (Apache-2.0 or MPL-2.0); their license headers are kept in the
+files.
